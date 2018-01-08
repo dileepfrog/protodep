@@ -13,6 +13,7 @@ type ProtoDepDependency struct {
 	Target   string `toml:"target"`
 	Revision string `toml:"revision"`
 	Branch   string `toml:"branch"`
+	Tag      string `toml:"tag"`
 }
 
 func (d *ProtoDepDependency) Repository() string {
