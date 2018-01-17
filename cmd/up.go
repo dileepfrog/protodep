@@ -56,7 +56,12 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		authProvider = helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", identityFile), password)
+		githubToken := os.Getenv("GITHUB_TOKEN")
+		if githubToken != "" {
+			logger.Info("github token is available. Trying to clone/fetch using it")
+		}
+
+		authProvider = helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", identityFile), password, githubToken)
 		updateService := service.NewSync(authProvider, homeDir, pwd, pwd)
 		return updateService.Resolve(isForceUpdate)
 	},
