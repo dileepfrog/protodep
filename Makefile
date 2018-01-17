@@ -28,10 +28,7 @@ define build-artifact
 endef
 
 build-all:
-		$(call build-artifact,linux,386)
 		$(call build-artifact,linux,amd64)
-		$(call build-artifact,linux,arm)
-		$(call build-artifact,linux,arm64)
 		$(call build-artifact,darwin,amd64)
 
 build:
@@ -45,3 +42,9 @@ $(TARGET_SERIAL_PACKAGES): test-%:
 mock:
 	go get github.com/golang/mock/mockgen
 	mockgen -source helper/auth.go -package helper -destination helper/auth_mock.go
+
+release:
+	./release.sh
+
+release-npm:
+	npm publish

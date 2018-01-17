@@ -30,3 +30,4 @@ bin/
 protodep.lock
 artifacts/
 proto/
+.tag.json
