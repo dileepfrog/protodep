@@ -28,6 +28,7 @@ define build-artifact
 endef
 
 build-all:
+		rm -rf ./artifacts/*
 		$(call build-artifact,linux,amd64)
 		$(call build-artifact,darwin,amd64)
 
