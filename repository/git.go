@@ -56,18 +56,18 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 	repopath := filepath.Join(r.protodepDir, reponame)
 
 	var rep *git.Repository
+	authMethod := r.authProvider.AuthMethod()
 
 	if stat, err := os.Stat(repopath); err == nil && stat.IsDir() {
-		spinner := logger.InfoWithSpinner("Fetching %s ", reponame)
+		spinner := logger.InfoWithSpinner("Fetching %s", reponame)
 
 		rep, err = git.PlainOpen(repopath)
 		if err != nil {
 			return nil, errors.Wrap(err, "open repository is failed")
 		}
-		spinner.Stop()
 
 		fetchOpts := &git.FetchOptions{
-			Auth: r.authProvider.AuthMethod(),
+			Auth: authMethod,
 		}
 
 		if err := rep.Fetch(fetchOpts); err != nil {
@@ -75,17 +75,19 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 				return nil, errors.Wrap(err, "fetch repository is failed")
 			}
 		}
-		spinner.Finish()
 
+		spinner.Finish()
 	} else {
-		spinner := logger.InfoWithSpinner("Cloning %s ", reponame)
+		spinner := logger.InfoWithSpinner("Cloning %s", reponame)
+
 		rep, err = git.PlainClone(repopath, false, &git.CloneOptions{
-			Auth: r.authProvider.AuthMethod(),
+			Auth: authMethod,
 			URL:  r.authProvider.GetRepositoryURL(reponame),
 		})
 		if err != nil {
 			return nil, errors.Wrap(err, "clone repository is failed")
 		}
+
 		spinner.Finish()
 	}
 

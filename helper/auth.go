@@ -52,9 +52,18 @@ func (p *AuthProviderWithSSH) GetRepositoryURL(reponame string) string {
 
 func (p *AuthProviderWithSSH) AuthMethod() transport.AuthMethod {
 	am, err := ssh.NewPublicKeysFromFile("git", p.pemFile, p.password)
+
 	if err != nil {
-		panic(err)
+		logger.Info("Using ssh agent")
+
+		am, err = ssh.NewSSHAgentAuth("git")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		logger.Info("Using public keys from file")
 	}
+
 	return am
 }
 
