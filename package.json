@@ -1,6 +1,6 @@
 {
   "name": "protodep-patch",
-  "version": "0.0.2-patch",
+  "version": "0.0.3-patch",
   "description": "protodep =======",
   "main": "index.js",
   "repository": {
