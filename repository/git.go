@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -56,7 +57,6 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 	repopath := filepath.Join(r.protodepDir, reponame)
 
 	var rep *git.Repository
-	authMethod := r.authProvider.AuthMethod()
 
 	if stat, err := os.Stat(repopath); err == nil && stat.IsDir() {
 		spinner := logger.InfoWithSpinner("Fetching %s", reponame)
@@ -66,26 +66,29 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 			return nil, errors.Wrap(err, "open repository is failed")
 		}
 
-		fetchOpts := &git.FetchOptions{
-			Auth: authMethod,
-		}
+		cmd := exec.Command("git", "fetch")
+		cmd.Dir = repopath
 
-		if err := rep.Fetch(fetchOpts); err != nil {
-			if err != git.NoErrAlreadyUpToDate {
-				return nil, errors.Wrap(err, "fetch repository is failed")
-			}
+		result, err := cmd.CombinedOutput()
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("fetch repository is failed: %s", string(result)))
 		}
 
 		spinner.Finish()
 	} else {
 		spinner := logger.InfoWithSpinner("Cloning %s", reponame)
 
-		rep, err = git.PlainClone(repopath, false, &git.CloneOptions{
-			Auth: authMethod,
-			URL:  r.authProvider.GetRepositoryURL(reponame),
-		})
+		url := r.authProvider.GetRepositoryURL(reponame)
+		cmd := exec.Command("git", "clone", url, repopath)
+
+		result, err := cmd.CombinedOutput()
 		if err != nil {
-			return nil, errors.Wrap(err, "clone repository is failed")
+			return nil, errors.Wrap(err, fmt.Sprintf("clone repository is failed: %s", string(result)))
+		}
+
+		rep, err = git.PlainOpen(repopath)
+		if err != nil {
+			return nil, errors.Wrap(err, "open repository is failed")
 		}
 
 		spinner.Finish()

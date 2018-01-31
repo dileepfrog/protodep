@@ -43,7 +43,7 @@ func NewAuthProvider(pemFile, password, githubToken string) AuthProvider {
 }
 
 func (p *AuthProviderWithSSH) GetRepositoryURL(reponame string) string {
-	ep, err := transport.NewEndpoint("ssh://" + reponame + ".git")
+	ep, err := transport.NewEndpoint("ssh://git@" + reponame + ".git")
 	if err != nil {
 		panic(err)
 	}
