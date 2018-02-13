@@ -1,0 +1,28 @@
+{
+  "name": "protodep-patch",
+  "version": "0.0.4-patch",
+  "description": "protodep =======",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/franciscocpg/protodep.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/franciscocpg/protodep/issues"
+  },
+  "homepage": "https://github.com/franciscocpg/protodep#readme",
+  "dependencies": {
+    "go-npm": "^0.1.8"
+  },
+  "scripts": {
+    "postinstall": "go-npm install",
+    "preuninstall": "go-npm uninstall"
+  },
+  "goBinary": {
+    "name": "protodep",
+    "path": "./bin",
+    "url": "https://github.com/franciscocpg/protodep/releases/download/v{{version}}/protodep_{{platform}}_{{arch}}.tar.gz"
+  }
+}

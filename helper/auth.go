@@ -21,8 +21,16 @@ type AuthProviderWithSSH struct {
 type AuthProviderHTTPS struct {
 }
 
-func NewAuthProvider(pemFile, password string) AuthProvider {
-	if pemFile != "" {
+type AuthProviderGithubHTTPS struct {
+	githubToken string
+}
+
+func NewAuthProvider(pemFile, password, githubToken string) AuthProvider {
+	if githubToken != "" {
+		return &AuthProviderGithubHTTPS{
+			githubToken: githubToken,
+		}
+	} else if pemFile != "" {
 		logger.Info("use SSH protocol")
 		return &AuthProviderWithSSH{
 			pemFile:  pemFile,
@@ -35,7 +43,7 @@ func NewAuthProvider(pemFile, password string) AuthProvider {
 }
 
 func (p *AuthProviderWithSSH) GetRepositoryURL(reponame string) string {
-	ep, err := transport.NewEndpoint("ssh://" + reponame + ".git")
+	ep, err := transport.NewEndpoint("ssh://git@" + reponame + ".git")
 	if err != nil {
 		panic(err)
 	}
@@ -44,9 +52,18 @@ func (p *AuthProviderWithSSH) GetRepositoryURL(reponame string) string {
 
 func (p *AuthProviderWithSSH) AuthMethod() transport.AuthMethod {
 	am, err := ssh.NewPublicKeysFromFile("git", p.pemFile, p.password)
+
 	if err != nil {
-		panic(err)
+		logger.Info("Using ssh agent")
+
+		am, err = ssh.NewSSHAgentAuth("git")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		logger.Info("Using public keys from file")
 	}
+
 	return am
 }
 
@@ -55,6 +72,15 @@ func (p *AuthProviderHTTPS) GetRepositoryURL(reponame string) string {
 }
 
 func (p *AuthProviderHTTPS) AuthMethod() transport.AuthMethod {
+	// nil is ok.
+	return nil
+}
+
+func (p *AuthProviderGithubHTTPS) GetRepositoryURL(reponame string) string {
+	return fmt.Sprintf("https://%s@%s.git", p.githubToken, reponame)
+}
+
+func (p *AuthProviderGithubHTTPS) AuthMethod() transport.AuthMethod {
 	// nil is ok.
 	return nil
 }
